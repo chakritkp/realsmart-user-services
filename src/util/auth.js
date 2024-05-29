@@ -6,6 +6,7 @@ const JWT_SECRET = process.env.JWT_SECRET;
 export const authPermissions = async (req, res, next) => {
   try {
     const cookies = req.headers.cookie;
+    console.log(req.headers)
     if (!cookies) {
       return res.status(401).json({ message: "No cookies provided" });
     }

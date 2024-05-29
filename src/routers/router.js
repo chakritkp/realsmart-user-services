@@ -9,9 +9,9 @@ import {
 
 const router = express.Router();
 
-router.get("/", authPermissions, getUsers);
+router.get("/", getUsers);
 
-router.get("/roles", authPermissions, gerRoles);
+router.get("/roles", gerRoles);
 
 router.post("/user-register-services", registerUser);
 

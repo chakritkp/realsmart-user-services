@@ -14,7 +14,7 @@ const DATAAUTH = process.env.DATABASEAUTH;
 
 app.use(json());
 app.use(cors({
-    origin: 'http://localhost:5173',
+    origin: ['http://localhost:5173', 'https://testing-chakrit.web.app'],
     credentials: true,
 }))
 
