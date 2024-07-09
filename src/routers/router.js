@@ -11,9 +11,15 @@ import {
   logoutController,
 } from "../controller/userController.js";
 
+import { getProductsController } from "../controller/productsController.js";
+
 import {
-  getProductsController
-} from "../controller/productsController.js";
+  getCartByIdController,
+  updateOrdersController,
+} from "../controller/ordersController.js";
+
+import multer from "multer";
+import path from "path";
 
 const router = express.Router();
 
@@ -39,10 +45,25 @@ router.get("/roles", authPermissions, gerRolesController);
 
 router.get("/products", authPermissions, getProductsController);
 
-router.post("/upload", (req, res) => {
+router.get("/cart/:id", authPermissions, getCartByIdController);
+
+router.post("/orders/:id", authPermissions, updateOrdersController);
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, path.join("/uploads/"));
+  },
+  filename: (req, file, cb) => {
+    cb(null, file.originalname);
+  },
+});
+
+const upload = multer({ storage: storage });
+
+router.post("/upload", upload.single("img"), (req, res) => {
   try {
     const {} = req.body;
-    res.json(req.file);
+    res.json(req.file.path);
   } catch (error) {}
 });
 

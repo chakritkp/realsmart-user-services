@@ -128,11 +128,20 @@ export const getUser = async (req, res) => {
     if (id !== tokenUser.id && tokenUser.role_id !== 1) {
       res.status(403).send("You don't have permission to access this user");
     } else {
-      const data = await Users.findOne({ _id: id }).select({
-        _id: true,
-        email: true,
-        phone_number: true,
-      });
+      const data = await Users.findOne({ _id: id })
+        .select({
+          _id: true,
+          email: true,
+          phone_number: true,
+        })
+        .populate({
+          path: "orders",
+          populate: {
+            path: "products.product",
+            select: "name",
+          },
+        })
+        .exec();
 
       res.status(200).json({
         data,
@@ -291,9 +300,12 @@ export const loginUser = async (req, res) => {
     const { email, password, phone_number } = req.headers;
 
     if ((!email || !phone_number) && !password) {
-      return res.status(400).json({
+      res.error.json({
         message: "Username or password required",
       });
+      // return res.status(400).json({
+      //   message: "Username or password required",
+      // });
     }
 
     let user = await Users.findOne({
@@ -345,7 +357,7 @@ export const loginUser = async (req, res) => {
             httpOnly: false,
             sameSite: "none",
           });
-           
+
           res.status(200).json({
             message: "Login Successful",
             id: user._id,

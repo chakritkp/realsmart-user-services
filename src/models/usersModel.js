@@ -5,6 +5,8 @@ const usersSchema = new mongoose.Schema({
   phone_number: { type: String, require: true },
   password: { type: String, require: true },
   role_id: { type: Number, default: 3 },
+  cart: [{ type: mongoose.Schema.Types.ObjectId, ref: "Orders" }],
+  orders: [{ type: mongoose.Schema.Types.ObjectId, ref: "Orders" }],
   is_active: { type: Boolean, default: true },
   create_date: {
     type: Date,
