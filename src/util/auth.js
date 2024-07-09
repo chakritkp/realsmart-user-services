@@ -3,25 +3,20 @@ import dotenv from "dotenv";
 dotenv.config();
 
 const JWT_SECRET = process.env.JWT_SECRET;
-export const authPermissions = async (req, res, next) => {
-  try {
-    const cookies = req.headers.cookie;
-    console.log(req.headers)
-    if (!cookies) {
-      return res.status(401).json({ message: "No cookies provided" });
-    }
 
-    const [name, value] = cookies.split("=");
-    const token = value;
+const authPermissions = async (req, res, next) => {
+  try {
+    const token = req.cookies.token;
 
     if (!token) {
       return res.status(401).json({ message: "No token provided" });
     }
 
-    jwt.verify(token, JWT_SECRET, (err, decoded) => {
+    jwt.verify(token, JWT_SECRET, (err, verify) => {
       if (err) {
-        console.error("JWT verification failed:", err);
+        console.error("Token verification failed:", err);
       } else {
+        req.user = verify;
         next();
       }
     });
@@ -30,3 +25,5 @@ export const authPermissions = async (req, res, next) => {
     res.status(401).send("Token Invalid!");
   }
 };
+
+export default authPermissions;

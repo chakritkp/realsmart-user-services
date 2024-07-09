@@ -1,20 +1,49 @@
 import express from "express";
-import { authPermissions } from "../util/auth.js";
+import authPermissions from "../util/auth.js";
 import {
-  getUsers,
-  gerRoles,
-  loginUser,
-  registerUser,
+  getUsersController,
+  gerRolesController,
+  getUserController,
+  registerUserController,
+  updateUserController,
+  deleteUserController,
+  loginUserController,
+  logoutController,
 } from "../controller/userController.js";
+
+import {
+  getProductsController
+} from "../controller/productsController.js";
 
 const router = express.Router();
 
-router.get("/", getUsers);
+/**
+ * @swagger
+ * /roles:
+ *  get:
+ *    summary: Returns a list of roles
+ *    description: Endpoint to fetch roles from the server
+ *    responses:
+ *      '200':
+ *        description: A successful response with roles data
+ */
+router.get("/users", authPermissions, getUsersController);
+router.get("/users/:id", authPermissions, getUserController);
+router.patch("/users/:id", authPermissions, updateUserController);
+router.delete("/users/:id", authPermissions, deleteUserController);
+router.post("/user-register-services", registerUserController);
+router.post("/user-login-services", loginUserController);
+router.post("/user-logout-services", authPermissions, logoutController);
 
-router.get("/roles", gerRoles);
+router.get("/roles", authPermissions, gerRolesController);
 
-router.post("/user-register-services", registerUser);
+router.get("/products", authPermissions, getProductsController);
 
-router.post("/user-login-services", loginUser);
+router.post("/upload", (req, res) => {
+  try {
+    const {} = req.body;
+    res.json(req.file);
+  } catch (error) {}
+});
 
 export default router;

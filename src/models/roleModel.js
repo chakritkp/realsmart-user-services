@@ -1,9 +1,9 @@
-import mongoose from 'mongoose';
+import mongoose from "mongoose";
 
-const roleSchema = new mongoose.Schema({
-  role_id: Number,
-  role_name: String,
-  is_active: Boolean,
+const rolesSchema = new mongoose.Schema({
+  role_id: { type: Number },
+  role_name: { type: String },
+  is_active: { type: Boolean },
 });
 
-export const Role = mongoose.model('Role', roleSchema, 'roles_table');
+export const Role = mongoose.model("Role", rolesSchema, "roles");

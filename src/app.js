@@ -3,6 +3,10 @@ import cors from "cors";
 import router from "./routers/router.js";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import swaggerSpec from "./config/swaggerConfig.js";
+import swaggerUi from "swagger-ui-express";
+import bodyParser from "body-parser";
+import cookieParser from "cookie-parser";
 
 dotenv.config();
 
@@ -11,8 +15,13 @@ const port = 3000;
 const DB = process.env.DATABASE;
 const DBURI = process.env.DATABASENAME;
 const DATAAUTH = process.env.DATABASEAUTH;
+const mongoURI =
+  "mongodb://realsmart:realsmartpass@localhost:27017/chakritkp?authSource=admin";
 
-app.use(json());
+app.use(express.json());
+app.use(bodyParser.json());
+app.use(cookieParser());
+
 app.use(
   cors({
     origin: [
@@ -24,20 +33,14 @@ app.use(
   })
 );
 
-mongoose.connect(
-  `mongodb+srv://${DBURI}:${DATAAUTH}.yf01htl.mongodb.net/${DB}`
-);
-const db = mongoose.connection;
-
-db.on("error", (error) => {
-  console.error("MongoDB connection error:", error);
-});
-
-db.once("open", () => {
-  console.log("Connected to MongoDB successfully");
-});
-
 app.use("/api-services", router);
-app.listen(port, () => {
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.listen(port, async () => {
+  await mongoose.connect(
+    `mongodb+srv://${DBURI}:${DATAAUTH}.yf01htl.mongodb.net/${DB}`
+  );
+  // await mongoose.connect(mongoURI);
   console.log(`Server is running on port http://localhost:${port}`);
 });
