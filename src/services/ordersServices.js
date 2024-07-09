@@ -13,10 +13,13 @@ export const getCartById = async (req, res) => {
         .send("You don't have permission to access this user");
     }
 
-    const data = await Orders.findOne({ user: id })
-      .where({ status: "cart" })
+    const data = await Orders.findOne({ user: id, status: "cart" })
       .populate("user", "email phone_number")
-      .populate("products._id", "img name code price");
+      .populate({
+        path: "products.product",
+        select: "img name code price",
+      })
+      .exec();
 
     return data;
   } catch (error) {
@@ -25,7 +28,7 @@ export const getCartById = async (req, res) => {
   }
 };
 
-export const updateOrders = async (req, res) => {
+export const updateCart = async (req, res) => {
   try {
     const tokenUser = req.user;
     const { id } = req.params;
@@ -58,6 +61,9 @@ export const updateOrders = async (req, res) => {
       let newOrder = new Orders({
         user: userId,
         status: "cart",
+        is_active: true,
+        create_date: new Date(),
+        update_date: new Date(),
       });
 
       //เชฟข้อมูลเข้า database colletion orders
@@ -95,19 +101,26 @@ export const updateOrders = async (req, res) => {
         }
 
         //ถ้าครบทุกเงื่อนไขให้ update order ด้วย order id นั้น และอัพเดทด้วย $addToSet เพื่อเพิ่มสิ้นค้าเข้าไปใน Array
+        const newProduct = {
+          product: product._id,
+          quantity: product.quantity,
+        };
+
         await Orders.updateOne(
           { _id: order._id },
           {
             $addToSet: {
-              products: product,
+              products: newProduct,
             },
           }
         );
       });
+      return res.status(200).json({
+        message: "Order updated successfully",
+      });
     }
 
     //** ในส่วนตรงนี้คือในกรณีที่ user มี order ที่อยู่ในสถานะ cart อยู่แล้ว */
-
     //เช็คสินค้าที่เข้ามาว่ามีไหม โดนต้องมากกว่า 0 ชิ้น ถ้าไม่ก็ return ออก (ในกรณีของฟังก์ชั่นนี้สามารถเก็บสินค้าได้หลายชิ้นใน 1 ทรานเซ็กชั่น)
     if (!products || products.length === 0) {
       res.status(403).json({
@@ -134,8 +147,12 @@ export const updateOrders = async (req, res) => {
 
       //เช็คว่าสินค้าที่ถูกเพิ่มเข้ามาใหม่มีอยู่ใน order อยู่แล้วไหม
       const findProductOnOrder = order.products.find(
-        (p) => p._id.toString() === product._id
+        (p) => p.product.toString() === product._id
       );
+      const newProduct = {
+        product: product._id,
+        quantity: product.quantity,
+      };
 
       //ถ้ามีอยู่แล้วเราจะใช้ $set เพื่ออัพเดทค่าที่มีอยู่แล้วเช่น จำนวนของสินค้า แต่ถ้าสินค้าที่เข้ามาใหม่ไม่ได้มีอยู่แล้วใช้ $addToSet เพื่อเพิ่มเข้าไปใน Array จบ
       if (findProductOnOrder) {
@@ -143,23 +160,28 @@ export const updateOrders = async (req, res) => {
           { _id: order._id },
           {
             $set: {
-              products: product,
+              products: newProduct,
+              update_date: new Date(),
             },
           }
         );
+        
       } else {
         await Orders.updateOne(
           { _id: order._id },
           {
             $addToSet: {
-              products: product,
+              products: newProduct,
+            },
+            $set: {
+              update_date: new Date(),
             },
           }
         );
       }
-      return res.status(200).json({
-        message: "Order updated successfully",
-      });
+    });
+    return res.status(200).json({
+      message: "Order updated successfully",
     });
   } catch (error) {
     console.error(error);

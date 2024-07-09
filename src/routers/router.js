@@ -15,7 +15,7 @@ import { getProductsController } from "../controller/productsController.js";
 
 import {
   getCartByIdController,
-  updateOrdersController,
+  updateCartController,
 } from "../controller/ordersController.js";
 
 import multer from "multer";
@@ -35,19 +35,18 @@ const router = express.Router();
  */
 router.get("/users", authPermissions, getUsersController);
 router.get("/users/:id", authPermissions, getUserController);
-router.patch("/users/:id", authPermissions, updateUserController);
-router.delete("/users/:id", authPermissions, deleteUserController);
 router.post("/user-register-services", registerUserController);
 router.post("/user-login-services", loginUserController);
 router.post("/user-logout-services", authPermissions, logoutController);
+router.patch("/users/:id", authPermissions, updateUserController);
+router.delete("/users/:id", authPermissions, deleteUserController);
 
 router.get("/roles", authPermissions, gerRolesController);
 
 router.get("/products", authPermissions, getProductsController);
 
 router.get("/cart/:id", authPermissions, getCartByIdController);
-
-router.post("/orders/:id", authPermissions, updateOrdersController);
+router.post("/cart/:id", authPermissions, updateCartController);
 
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {

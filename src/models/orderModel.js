@@ -4,29 +4,35 @@ const ordersSchema = new mongoose.Schema({
   user: {
     type: mongoose.Schema.Types.ObjectId,
     ref: "Users",
-  },
-  products: {
-    type: [
-      {
-        _id: {
-          type: mongoose.Schema.Types.ObjectId,
-          ref: "Products",
-          required: true,
-        },
-        quantity: {
-          type: Number,
-          required: true,
-          min: 1,
-        },
-      },
-    ],
     required: true,
   },
-
+  products: [
+    {
+      product: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Products",
+        required: true,
+      },
+      quantity: {
+        type: Number,
+        required: true,
+        min: 1,
+      },
+    },
+  ],
   status: {
     type: String,
     enum: ["cart", "pending", "paid", "success", "shipping", "done"],
     default: "cart",
+  },
+  is_active: { type: Boolean, default: true },
+  create_date: {
+    type: Date,
+    default: Date.now,
+  },
+  update_date: {
+    type: Date,
+    default: Date.now,
   },
 });
 

@@ -134,13 +134,6 @@ export const getUser = async (req, res) => {
           email: true,
           phone_number: true,
         })
-        .populate({
-          path: "orders",
-          populate: {
-            path: "products.product",
-            select: "name",
-          },
-        })
         .exec();
 
       res.status(200).json({
