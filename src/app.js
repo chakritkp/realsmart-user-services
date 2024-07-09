@@ -7,6 +7,9 @@ import swaggerSpec from "./config/swaggerConfig.js";
 import swaggerUi from "swagger-ui-express";
 import bodyParser from "body-parser";
 import cookieParser from "cookie-parser";
+import helmet from "helmet";
+import compression from "compression";
+import morgan from "morgan";
 
 dotenv.config();
 
@@ -21,6 +24,9 @@ const mongoURI =
 app.use(express.json());
 app.use(bodyParser.json());
 app.use(cookieParser());
+app.use(helmet());
+app.use(compression());
+app.use(morgan('combined'));
 
 app.use(
   cors({
@@ -36,6 +42,11 @@ app.use(
 app.use("/api-services", router);
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).send(err.stack);
+});
 
 app.listen(port, async () => {
   await mongoose.connect(
